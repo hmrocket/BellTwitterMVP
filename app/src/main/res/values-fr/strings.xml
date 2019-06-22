@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--Login Activity-->
+    <string name="authentication_failed">Authentification échouée</string>
+    <!--Map Activity -->
+    <string name="title_activity_tweets_map">Map</string>
+
+
+</resources>

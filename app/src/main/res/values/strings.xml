@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">Bell Twitter MVP</string>
+    <string name="app_name" translatable="false">Bell Twitter MVP</string>
+    <string name="authentication_failed">Authentication failed</string>
+    <string name="title_activity_tweets_map">Map</string>
 </resources>
