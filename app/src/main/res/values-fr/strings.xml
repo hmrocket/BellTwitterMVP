@@ -5,5 +5,13 @@
     <!--Map Activity -->
     <string name="title_activity_tweets_map">Map</string>
 
+    <string name="retweeted_by">Retweeter par @%1$s</string>
 
+    <!-- Content Descriptors -->
+    <string name="retweet_imageButton_contentDescriptor">Button Image Retweet</string>
+    <string name="favourite_imageButton_contentDescriptor">Bouton Image préférée</string>
+    <string name="profile_pic_contentDescriptor">Image de Profile</string>
+    <string name="play_video_contentDescription">Bouton de Lecture Vidéo</string>
+    <string name="video_preview_contentDescription">Aperçu vidéo</string>
+    <string name="tweet_photo_contentDescriptor">Photo du Tweet</string>
 </resources>

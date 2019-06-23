@@ -2,4 +2,15 @@
     <string name="app_name" translatable="false">Bell Twitter MVP</string>
     <string name="authentication_failed">Authentication failed</string>
     <string name="title_activity_tweets_map">Map</string>
+
+
+    <string name="retweeted_by">Retweeted by @%1$s</string>
+
+    <!-- Content Descriptors -->
+    <string name="retweet_imageButton_contentDescriptor">Retweet Image Button</string>
+    <string name="favourite_imageButton_contentDescriptor">Favourite Image Button</string>
+    <string name="profile_pic_contentDescriptor">Profile Picture</string>
+    <string name="play_video_contentDescription">Play Video Button</string>
+    <string name="video_preview_contentDescription">Video Preview</string>
+    <string name="tweet_photo_contentDescriptor">Tweet Photo</string>
 </resources>
