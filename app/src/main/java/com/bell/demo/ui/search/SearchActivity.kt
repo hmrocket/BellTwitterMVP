@@ -9,13 +9,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.bell.demo.BuildConfig.TWITTER_CONSUMER_KEY
-import com.bell.demo.BuildConfig.TWITTER_CONSUMER_SECRET
 import com.bell.demo.R
-import com.twitter.sdk.android.core.DefaultLogger
-import com.twitter.sdk.android.core.Twitter
-import com.twitter.sdk.android.core.TwitterAuthConfig
-import com.twitter.sdk.android.core.TwitterConfig
+import com.twitter.sdk.android.core.Callback
+import com.twitter.sdk.android.core.Result
+import com.twitter.sdk.android.core.TwitterCore
+import com.twitter.sdk.android.core.TwitterException
+import com.twitter.sdk.android.core.models.Search
+import com.twitter.sdk.android.core.models.Tweet
+import com.twitter.sdk.android.core.services.params.Geocode
 import com.twitter.sdk.android.tweetui.SearchTimeline
 import com.twitter.sdk.android.tweetui.TweetTimelineRecyclerViewAdapter
 import kotlinx.android.synthetic.main.activity_search.*
@@ -24,19 +25,19 @@ import kotlinx.android.synthetic.main.activity_search.*
 class SearchActivity : AppCompatActivity() {
 
     companion object {
-        fun launch(contecxt : Context) {
+        fun launch(contecxt: Context) {
             contecxt.startActivity(Intent(contecxt, SearchActivity::class.java))
         }
     }
 
+    private lateinit var recyclerView: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
         setSupportActionBar(toolbar)
+        recyclerView = findViewById(R.id.tweetsRecyclerView)
 
-        if (savedInstanceState == null)
-            initTwitter()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -59,9 +60,27 @@ class SearchActivity : AppCompatActivity() {
     private fun search(query: String) {
         Log.d("search", "query = $query")
 
-        val recyclerView: RecyclerView = findViewById(R.id.tweetsRecyclerView)
-
         recyclerView.layoutManager = LinearLayoutManager(this)
+
+        val searchService = TwitterCore.getInstance().apiClient.searchService
+        val montreal = Geocode(45.5017, 73.5673, 100, null)
+        searchService.tweets(query, montreal, "en", "ca", "tweet", 100, null, null, null, true)
+            .enqueue(object : Callback<Search>() {
+                override fun success(result: Result<Search>) {
+                    //Do something with result
+                    result.data.tweets.forEach { action: Tweet ->
+                        run {
+                            Log.d("tweet", action.text)
+                        }
+                    }
+                }
+
+                override fun failure(exception: TwitterException) {
+                    //Do something on failure
+                    Log.e("tweet search", "failed request")
+                }
+            })
+
 
         val searchTimeline = SearchTimeline.Builder()
             .query("#hiking")
@@ -77,20 +96,4 @@ class SearchActivity : AppCompatActivity() {
 
     }
 
-    private fun initTwitter() {
-        val config = TwitterConfig.Builder(this)
-            .logger(DefaultLogger(Log.DEBUG))//enable logging when app is in debug mode
-            .twitterAuthConfig(
-                TwitterAuthConfig(
-                    TWITTER_CONSUMER_KEY,
-                    TWITTER_CONSUMER_SECRET
-                )
-            )
-            //pass the created app Consumer KEY and Secret also called API Key and Secret
-            .debug(true)//enable debug mode
-            .build()
-
-        //finally initialize twitter with created configs
-        Twitter.initialize(config)
-    }
 }
