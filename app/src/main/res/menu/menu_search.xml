@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="com.bell.demo.ui.search.SearchActivity">
+    <item android:id="@+id/action_search"
+          android:title="@string/action_search"
+          android:orderInCategory="1"
+          app:actionViewClass="androidx.appcompat.widget.SearchView"
+          tools:ignore="AlwaysShowAction"
+          app:showAsAction="always"/>
+</menu>

@@ -14,4 +14,6 @@
     <string name="play_video_contentDescription">Bouton de Lecture Vidéo</string>
     <string name="video_preview_contentDescription">Aperçu vidéo</string>
     <string name="tweet_photo_contentDescriptor">Photo du Tweet</string>
+    <string name="action_search">Recherche</string>
+    <string name="title_activity_search">Recherche de Tweets</string>
 </resources>

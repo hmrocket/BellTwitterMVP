@@ -13,4 +13,6 @@
     <string name="play_video_contentDescription">Play Video Button</string>
     <string name="video_preview_contentDescription">Video Preview</string>
     <string name="tweet_photo_contentDescriptor">Tweet Photo</string>
+    <string name="title_activity_search">Search Tweets</string>
+    <string name="action_search" >Search</string>
 </resources>

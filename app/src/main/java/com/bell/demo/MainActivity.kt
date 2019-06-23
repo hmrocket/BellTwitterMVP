@@ -1,14 +1,13 @@
 package com.bell.demo
 
 import android.Manifest
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.bell.demo.ui.TweetsMapActivity
+import com.bell.demo.ui.search.SearchActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -21,7 +20,7 @@ class MainActivity : AppCompatActivity() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), RQ_LOCATION_PERMISSION)
 
-        startActivity(Intent(this, TweetsMapActivity::class.java))
+        SearchActivity.launch(this)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
