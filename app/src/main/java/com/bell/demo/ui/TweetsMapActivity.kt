@@ -2,6 +2,7 @@ package com.bell.demo.ui
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.location.Location
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -21,6 +22,12 @@ import kotlinx.android.synthetic.main.map_tweet.view.*
 
 class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback , GoogleMap.OnMyLocationButtonClickListener,
     GoogleMap.OnMyLocationClickListener {
+
+    companion object {
+        fun launch(context: Context) {
+            context.startActivity(Intent(context, TweetsMapActivity::class.java))
+        }
+    }
 
     private lateinit var mMap: GoogleMap
 

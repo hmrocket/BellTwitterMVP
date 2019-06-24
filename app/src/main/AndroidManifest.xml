@@ -20,9 +20,12 @@
         <activity
                 android:name=".ui.search.SearchActivity"
                 android:label="@string/title_activity_search"
+                android:parentActivityName=".MainActivity"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
-        <activity android:name=".MainActivity">
+        <activity
+                android:theme="@style/AppTheme.NoActionBar"
+                android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -43,23 +46,22 @@
 
         <activity
                 android:name=".ui.TweetsMapActivity"
+                android:parentActivityName=".MainActivity"
                 android:label="@string/title_activity_tweets_map">
+             <intent-filter>
+             <action android:name="android.intent.action.VIEW"/>
 
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.VIEW"/> -->
-
-
-            <!-- <category android:name="android.intent.category.DEFAULT"/> -->
-            <!-- </intent-filter> -->
+             <category android:name="android.intent.category.DEFAULT"/>
+             </intent-filter>
         </activity>
         <activity android:name=".ui.LoginActivity">
 
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.VIEW"/> -->
+             <intent-filter>
+             <action android:name="android.intent.action.VIEW"/>
 
 
-            <!-- <category android:name="android.intent.category.DEFAULT"/> -->
-            <!-- </intent-filter> -->
+             <category android:name="android.intent.category.DEFAULT"/>
+             </intent-filter>
         </activity>
     </application>
 

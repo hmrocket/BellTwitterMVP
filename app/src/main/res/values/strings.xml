@@ -14,5 +14,13 @@
     <string name="video_preview_contentDescription">Video Preview</string>
     <string name="tweet_photo_contentDescriptor">Tweet Photo</string>
     <string name="title_activity_search">Search Tweets</string>
-    <string name="action_search" >Search</string>
+    <string name="action_search">Search</string>
+    <string name="welcome">WELCOME!</string>
+    <string name="demo_description">Simple demo to demonstrate Kotlin and Android SDK knowledge plus other concepts much
+        needed for Android development.
+        \nThis MVP has two tasks:\nA) Setup Google Maps service to display 100 tweets, with an adjustable radius.
+        \nB) Display tweets based on keyword(s) or hashtag(s) search, video and images should be viewable.
+    </string>
+    <string name="task_a">Task A</string>
+    <string name="task_b">Task B</string>
 </resources>

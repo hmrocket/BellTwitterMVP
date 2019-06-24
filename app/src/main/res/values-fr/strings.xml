@@ -16,4 +16,12 @@
     <string name="tweet_photo_contentDescriptor">Photo du Tweet</string>
     <string name="action_search">Recherche</string>
     <string name="title_activity_search">Recherche de Tweets</string>
+    <string name="welcome">BIENVENUE!</string>
+    <string name="task_a">Tâche A</string>
+    <string name="task_b">Tâche B</string>
+    <string name="demo_description">Démo simple pour démontrer les connaissances de Kotlin et du SDK Android,
+        ainsi que d’autres concepts indispensables au développement Android.
+        \nCette démo a deux tâches: \nA) Configurer le service Google Maps et afficher 100 tweets à rayon réglable.     
+        \nB) Afficher les tweets basés sur une recherche par mot-clé(s) ou hashtag(s), les vidéos et les images doivent être visionnables.
+    </string>
 </resources>
