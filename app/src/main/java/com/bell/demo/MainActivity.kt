@@ -9,9 +9,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import com.bell.demo.ui.TweetsMapActivity
 import com.bell.demo.ui.search.SearchActivity
+import com.bell.demo.utils.Utils
 
 class MainActivity : AppCompatActivity() {
 
@@ -23,17 +23,17 @@ class MainActivity : AppCompatActivity() {
 
         setupButton()
 
-        if (!isLocationGranted())
+        if (!Utils.isLocationGranted(this))
             askForLocationPermission()
 
-        TweetsMapActivity.launch(this)
+        SearchActivity.launch(this)
     }
 
     private fun setupButton() {
         // we'll use one click listener for both button
         val listener: View.OnClickListener = View.OnClickListener {
             when {
-                !isLocationGranted() -> askForLocationPermission()
+                !Utils.isLocationGranted(this) -> askForLocationPermission()
                 it.id == R.id.btn_a -> TweetsMapActivity.launch(this@MainActivity)
                 else -> SearchActivity.launch(this@MainActivity)
             }
@@ -65,11 +65,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun isLocationGranted() =
-        ContextCompat.checkSelfPermission(
-            this@MainActivity,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {

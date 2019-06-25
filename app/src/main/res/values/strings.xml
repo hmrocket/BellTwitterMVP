@@ -28,4 +28,5 @@
     </string>
     <string name="permission_rational_title">Permission required</string>
     <string name="permission_denied">Permission Denied</string>
+    <string name="login_please">Retweets and Likes require a session, please login</string>
 </resources>

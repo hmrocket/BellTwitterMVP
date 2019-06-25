@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.location.Location
+import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -44,6 +45,7 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnM
     private lateinit var mMap: GoogleMap
     private var mapReady = false
     private var queue: List<Tweet> = Collections.emptyList()
+    private var location: Location? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,8 +55,13 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnM
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
+        // get location
+        getCurrentLocation()
+
         // load tweets
-        val geocode = Geocode(45.5017, 73.5673, 9995, Geocode.Distance.KILOMETERS)
+        val geocode =
+            Geocode(location?.latitude ?: 45.5017, location?.longitude ?: 73.5673,
+                9995, Geocode.Distance.KILOMETERS)
         TwitterCore.getInstance().apiClient.searchService.tweets(
             "#food", geocode, null,
             null, null, 100, null, null, null, null
@@ -72,29 +79,42 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnM
         })
     }
 
+    @SuppressLint("MissingPermission")
+    private fun getCurrentLocation() {
+        if (!Utils.isLocationGranted(this)) {
+            finish()
+            return // location permission is needed
+        }
+
+        val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+
+    }
+
     private fun displayTweets() {
         if (queue.isEmpty() || !mapReady) {
             return
         }
-        queue.forEachIndexed {i, it -> run {
-            val pos: LatLng? = it.coordinates?.let { it2 -> LatLng(it2.latitude, it2.longitude) }
-            /// if coordinate is null check place https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/geo-objects.html
-                ?: run {
-                    it.place?.boundingBox?.coordinates?.let { it2 ->
-                        if (it2.isNotEmpty() && it2[0].isNotEmpty()) LatLng(
-                            it2[0][0][Coordinates.INDEX_LATITUDE],
-                            it2[0][0][Coordinates.INDEX_LONGITUDE]
-                        )
-                        else null
-                    } ?: run { null }
-                }
+        queue.forEachIndexed { i, it ->
+            run {
+                val pos: LatLng? = it.coordinates?.let { it2 -> LatLng(it2.latitude, it2.longitude) }
+                /// if coordinate is null check place https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/geo-objects.html
+                    ?: run {
+                        it.place?.boundingBox?.coordinates?.let { it2 ->
+                            if (it2.isNotEmpty() && it2[0].isNotEmpty()) LatLng(
+                                it2[0][0][Coordinates.INDEX_LATITUDE],
+                                it2[0][0][Coordinates.INDEX_LONGITUDE]
+                            )
+                            else null
+                        } ?: run { null }
+                    }
 
-            // if we have a non null position add marker
-            pos?.let { it2 ->
-                val text = "${it.user.profileImageUrlHttps}~${it.createdAt}~${it.text}~$i"
-                mMap.addMarker(MarkerOptions().position(it2).title(it.user.name).snippet(text))
+                // if we have a non null position add marker
+                pos?.let { it2 ->
+                    val text = "${it.user.profileImageUrlHttps}~${it.createdAt}~${it.text}~$i"
+                    mMap.addMarker(MarkerOptions().position(it2).title(it.user.name).snippet(text))
+                }
             }
-        }
         }
     }
 
@@ -159,7 +179,6 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnM
 
             return v
         }
-
 
 
         override fun getInfoWindow(p0: Marker?) = null

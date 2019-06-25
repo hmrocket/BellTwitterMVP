@@ -29,4 +29,5 @@
     </string>
     <string name="permission_rational_title">Permission demander</string>
     <string name="permission_denied">Permission refusée</string>
+    <string name="login_please">Les retweets et les jaimes nécessitent une session, veuillez vous identifier.</string>
 </resources>

@@ -1,15 +1,19 @@
 package com.bell.demo.ui.search
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.location.Location
+import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.bell.demo.R
+import com.bell.demo.ui.LoginActivity
+import com.bell.demo.utils.Utils
 import com.twitter.sdk.android.core.Callback
 import com.twitter.sdk.android.core.Result
 import com.twitter.sdk.android.core.TwitterCore
@@ -22,7 +26,7 @@ import com.twitter.sdk.android.tweetui.TweetTimelineRecyclerViewAdapter
 import kotlinx.android.synthetic.main.activity_search.*
 
 
-class SearchActivity : AppCompatActivity() {
+class SearchActivity : AppCompatActivity(), InteractionListener {
 
     companion object {
         fun launch(contecxt: Context) {
@@ -30,15 +34,41 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
-    private lateinit var recyclerView: RecyclerView
+    private lateinit var adapter: SearchAdapter
+    private var location: Location? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
         setSupportActionBar(toolbar)
-        recyclerView = findViewById(R.id.tweetsRecyclerView)
+        supportActionBar?.setHomeButtonEnabled(true)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        setupRecyclerView()
+
+        getCurrentLocation()
+
+        search("#food")
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun getCurrentLocation() {
+        if (!Utils.isLocationGranted(this)) {
+            finish()
+            return // location permission is needed
+        }
+
+        val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER)
 
     }
+
+    fun setupRecyclerView() {
+        tweetsRecyclerView.layoutManager = LinearLayoutManager(this)
+        adapter = SearchAdapter(this@SearchActivity)
+        tweetsRecyclerView.adapter = adapter
+        tweetsRecyclerView.setHasFixedSize(true)
+    }
+
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_search, menu)
@@ -47,6 +77,8 @@ class SearchActivity : AppCompatActivity() {
         searchItem.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
                 search(query)
+                supportActionBar?.title = query
+                searchItem.onActionViewCollapsed()
                 return true
             }
 
@@ -60,13 +92,24 @@ class SearchActivity : AppCompatActivity() {
     private fun search(query: String) {
         Log.d("search", "query = $query")
 
-        recyclerView.layoutManager = LinearLayoutManager(this)
-
         val searchService = TwitterCore.getInstance().apiClient.searchService
-        val montreal = Geocode(45.5017, 73.5673, 100, null)
-        searchService.tweets(query, montreal, "en", "ca", "tweet", 100, null, null, null, true)
+        val montreal = Geocode(
+            location?.latitude ?: 45.5017, location?.longitude ?: 73.5673,
+            100, Geocode.Distance.KILOMETERS
+        )
+        searchService.tweets(query, montreal, null, null, null, 100, null, null, null, null
+//        val geocode =
+//            Geocode(location?.latitude ?: 45.5017, location?.longitude ?: 73.5673,
+//                9995, Geocode.Distance.KILOMETERS)
+//        TwitterCore.getInstance().apiClient.searchService.tweets(
+//            query, geocode, null,
+//            null, null, 100, null, null, null, null
+        )
             .enqueue(object : Callback<Search>() {
                 override fun success(result: Result<Search>) {
+                    adapter.tweets = result.data.tweets
+                    adapter.notifyDataSetChanged()
+
                     //Do something with result
                     result.data.tweets.forEach { action: Tweet ->
                         run {
@@ -77,7 +120,7 @@ class SearchActivity : AppCompatActivity() {
 
                 override fun failure(exception: TwitterException) {
                     //Do something on failure
-                    Log.e("tweet search", "failed request")
+                    Log.e("tweet search", "failed request ${exception.message}")
                 }
             })
 
@@ -92,8 +135,53 @@ class SearchActivity : AppCompatActivity() {
             .setViewStyle(R.style.tw__TweetLightWithActionsStyle)
             .build()
 
-        recyclerView.adapter = adapter
+
+        // recyclerView.adapter = adapter
 
     }
 
+
+    override fun favorite(tweet: Tweet) {
+        if(TwitterCore.getInstance().sessionManager.activeSession == null)
+            LoginActivity.launch(this)
+        else
+            TwitterCore.getInstance().apiClient.favoriteService.create(tweet.id, null)
+    }
+
+    override fun retweet(tweet: Tweet) {
+        if(TwitterCore.getInstance().sessionManager.activeSession == null)
+            LoginActivity.launch(this)
+        else
+            TwitterCore.getInstance().apiClient.statusesService.retweet(tweet.id, null)
+    }
+
+    override fun unfavorite(tweet: Tweet) {
+        if(TwitterCore.getInstance().sessionManager.activeSession == null)
+            LoginActivity.launch(this)
+        else
+            TwitterCore.getInstance().apiClient.favoriteService.destroy(tweet.id, null)
+    }
+
+    override fun unretweet(tweet: Tweet) {
+        if(TwitterCore.getInstance().sessionManager.activeSession == null)
+            LoginActivity.launch(this)
+        else
+            TwitterCore.getInstance().apiClient.statusesService.unretweet(tweet.id, null)
+    }
+
+    override fun openTweet(tweet: Tweet) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun showImage(imageUrl: String) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun showImages(imageUrls: List<String>, index: Int) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun showVideo(videoUrl: String, videoType: String) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 }

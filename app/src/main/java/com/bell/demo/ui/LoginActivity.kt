@@ -1,5 +1,6 @@
 package com.bell.demo.ui
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -10,6 +11,12 @@ import com.twitter.sdk.android.core.identity.TwitterLoginButton
 
 class LoginActivity : AppCompatActivity() {
 
+
+    companion object {
+        fun launch(context: Context) {
+            context.startActivity(Intent(context, LoginActivity::class.java))
+        }
+    }
 
     private lateinit var twitterLoginButton: TwitterLoginButton
 
