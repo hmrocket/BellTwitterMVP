@@ -5,11 +5,14 @@ import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bell.demo.R
+import com.bell.demo.ui.search.SearchActivity
+import com.bell.demo.utils.Utils
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -18,9 +21,18 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.squareup.picasso.Picasso
+import com.twitter.sdk.android.core.Callback
+import com.twitter.sdk.android.core.Result
+import com.twitter.sdk.android.core.TwitterCore
+import com.twitter.sdk.android.core.TwitterException
+import com.twitter.sdk.android.core.models.Coordinates
+import com.twitter.sdk.android.core.models.Search
+import com.twitter.sdk.android.core.models.Tweet
+import com.twitter.sdk.android.core.services.params.Geocode
 import kotlinx.android.synthetic.main.map_tweet.view.*
+import java.util.*
 
-class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback , GoogleMap.OnMyLocationButtonClickListener,
+class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener,
     GoogleMap.OnMyLocationClickListener {
 
     companion object {
@@ -30,6 +42,8 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback , GoogleMap.On
     }
 
     private lateinit var mMap: GoogleMap
+    private var mapReady = false
+    private var queue: List<Tweet> = Collections.emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +52,50 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback , GoogleMap.On
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
+        // load tweets
+        val geocode = Geocode(45.5017, 73.5673, 9995, Geocode.Distance.KILOMETERS)
+        TwitterCore.getInstance().apiClient.searchService.tweets(
+            "#food", geocode, null,
+            null, null, 100, null, null, null, null
+        ).enqueue(object : Callback<Search>() {
+            override fun success(result: Result<Search>?) {
+                Log.d("request", result?.data?.tweets?.size.toString())
+                queue = result?.data?.tweets ?: Collections.emptyList()
+                displayTweets()
+            }
+
+            override fun failure(exception: TwitterException?) {
+                Log.e("request", exception?.cause?.toString() ?: "")
+            }
+
+        })
+    }
+
+    private fun displayTweets() {
+        if (queue.isEmpty() || !mapReady) {
+            return
+        }
+        queue.forEachIndexed {i, it -> run {
+            val pos: LatLng? = it.coordinates?.let { it2 -> LatLng(it2.latitude, it2.longitude) }
+            /// if coordinate is null check place https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/geo-objects.html
+                ?: run {
+                    it.place?.boundingBox?.coordinates?.let { it2 ->
+                        if (it2.isNotEmpty() && it2[0].isNotEmpty()) LatLng(
+                            it2[0][0][Coordinates.INDEX_LATITUDE],
+                            it2[0][0][Coordinates.INDEX_LONGITUDE]
+                        )
+                        else null
+                    } ?: run { null }
+                }
+
+            // if we have a non null position add marker
+            pos?.let { it2 ->
+                val text = "${it.user.profileImageUrlHttps}~${it.createdAt}~${it.text}~$i"
+                mMap.addMarker(MarkerOptions().position(it2).title(it.user.name).snippet(text))
+            }
+        }
+        }
     }
 
     /**
@@ -52,21 +110,20 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback , GoogleMap.On
     @SuppressLint("MissingPermission")
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+        mapReady = true
 
-        // Add a marker in Sydney and move the camera
-        val sydney = LatLng(-34.0, 151.0)
-        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        // move the camera to current position
+        val currentLocation = LatLng(45.5017, 73.5673)
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation))
+        //val location = CameraUpdateFactory.newLatLngZoom(currentLocation, 12.0f)
 
-        val currentLocation = sydney
-
-        val location = CameraUpdateFactory.newLatLngZoom(currentLocation, 12.0f)
-
-        mMap.setInfoWindowAdapter(InfoAdapter(this))
-        mMap.animateCamera(location)
+        val adapter = InfoAdapter(this)
+        mMap.setInfoWindowAdapter(adapter)
+        mMap.setOnInfoWindowClickListener(adapter)
+//        mMap.animateCamera(location)
         mMap.isMyLocationEnabled = true
-        mMap.setOnMyLocationButtonClickListener(this)
-        mMap.setOnMyLocationClickListener(this)
+
+        displayTweets()
     }
 
     override fun onMyLocationButtonClick(): Boolean {
@@ -78,7 +135,11 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback , GoogleMap.On
         Toast.makeText(this, "Current location:\n" + p0, Toast.LENGTH_LONG).show()
     }
 
-    class InfoAdapter(private val context: Context) : GoogleMap.InfoWindowAdapter {
+    class InfoAdapter(private val context: Context) : GoogleMap.InfoWindowAdapter, GoogleMap.OnInfoWindowClickListener {
+        override fun onInfoWindowClick(p0: Marker?) {
+            SearchActivity.launch(context)
+        }
+
         override fun getInfoContents(marker: Marker): View {
             val v = LayoutInflater.from(context).inflate(R.layout.map_tweet, null)
 
@@ -92,14 +153,14 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback , GoogleMap.On
                 .load(photoUrl)
                 .into(v.avatar)
 
-            Picasso.with(context).load(photoUrl).into(v.avatar)
-
-            v.timestamp.text = timestamp
+            v.timestamp.text = Utils.formatTime(timestamp)
             v.name.text = marker.title
             v.tweet.text = tweet
 
             return v
         }
+
+
 
         override fun getInfoWindow(p0: Marker?) = null
     }

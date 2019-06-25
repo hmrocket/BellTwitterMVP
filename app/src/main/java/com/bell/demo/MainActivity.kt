@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -22,10 +23,10 @@ class MainActivity : AppCompatActivity() {
 
         setupButton()
 
-        if (isLocationGranted())
+        if (!isLocationGranted())
             askForLocationPermission()
 
-        SearchActivity.launch(this)
+        TweetsMapActivity.launch(this)
     }
 
     private fun setupButton() {
@@ -42,12 +43,26 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btn_b).setOnClickListener(listener)
     }
 
+
     private fun askForLocationPermission() {
-        ActivityCompat.requestPermissions(
-            this@MainActivity,
-            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-            RQ_LOCATION_PERMISSION
-        )
+
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            val builder = AlertDialog.Builder(this)
+            builder
+                .setMessage(getString(R.string.permission_rational_msg))
+                .setTitle(getString(R.string.permission_rational_title))
+                .setPositiveButton(android.R.string.ok) { _, _ ->
+                    ActivityCompat.requestPermissions(
+                        this@MainActivity,
+                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                        RQ_LOCATION_PERMISSION
+                    )
+                }
+
+            val dialog = builder.create()
+            dialog.show()
+
+        }
     }
 
     private fun isLocationGranted() =
@@ -67,7 +82,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun permissionNotGranted() {
-        // Location permission is needed, must explain why and ask again or direct the user to the setting, or else exit the app
-        Toast.makeText(this, "Permission Denied", Toast.LENGTH_LONG).show()
+        // Location permission is needed, must explain why and ask again or direct the user to the setting
+        Toast.makeText(this, getString(R.string.permission_denied), Toast.LENGTH_LONG).show()
     }
 }

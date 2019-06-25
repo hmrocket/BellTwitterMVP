@@ -23,4 +23,9 @@
     </string>
     <string name="task_a">Task A</string>
     <string name="task_b">Task B</string>
+    <string name="permission_rational_msg">Permission to access the location is required for this app to display tweets
+        near you.
+    </string>
+    <string name="permission_rational_title">Permission required</string>
+    <string name="permission_denied">Permission Denied</string>
 </resources>

@@ -24,4 +24,9 @@
         \nCette démo a deux tâches: \nA) Configurer le service Google Maps et afficher 100 tweets à rayon réglable.     
         \nB) Afficher les tweets basés sur une recherche par mot-clé(s) ou hashtag(s), les vidéos et les images doivent être visionnables.
     </string>
+    <string name="permission_rational_msg">L\'autorisation d\'accéder à l\'emplacement est requise pour que cette
+        application puisse afficher des tweets près de toi.
+    </string>
+    <string name="permission_rational_title">Permission demander</string>
+    <string name="permission_denied">Permission refusée</string>
 </resources>
