@@ -22,6 +22,6 @@ class StatusMultiplePhotosViewHolder(container: View, listener: InteractionListe
 
     override fun setup(tweet: Tweet) {
         super.setup(tweet)
-        tweetPhotosRecyclerView.adapter = ImagesAdapter(tweet.entities, listener)
+        tweetPhotosRecyclerView.adapter = ImagesAdapter(tweet.extendedEntities, listener)
     }
 }

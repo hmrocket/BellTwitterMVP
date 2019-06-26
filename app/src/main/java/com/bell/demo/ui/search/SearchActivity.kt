@@ -8,11 +8,14 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bell.demo.R
 import com.bell.demo.ui.LoginActivity
+import com.bell.demo.ui.image.ImageActivity
+import com.bell.demo.ui.video.VideoActivity
 import com.bell.demo.utils.Utils
 import com.twitter.sdk.android.core.Callback
 import com.twitter.sdk.android.core.Result
@@ -95,9 +98,9 @@ class SearchActivity : AppCompatActivity(), InteractionListener {
         val searchService = TwitterCore.getInstance().apiClient.searchService
         val montreal = Geocode(
             location?.latitude ?: 45.5017, location?.longitude ?: 73.5673,
-            100, Geocode.Distance.KILOMETERS
+            1000, Geocode.Distance.KILOMETERS
         )
-        searchService.tweets(query, montreal, null, null, null, 100, null, null, null, null
+        searchService.tweets(query, montreal, null, null, null, 100, null, null, null, true
 //        val geocode =
 //            Geocode(location?.latitude ?: 45.5017, location?.longitude ?: 73.5673,
 //                9995, Geocode.Distance.KILOMETERS)
@@ -170,18 +173,18 @@ class SearchActivity : AppCompatActivity(), InteractionListener {
     }
 
     override fun openTweet(tweet: Tweet) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        Toast.makeText(this, "open tweet", Toast.LENGTH_SHORT).show()
     }
 
     override fun showImage(imageUrl: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        ImageActivity.launch(this, arrayOf(imageUrl))
     }
 
     override fun showImages(imageUrls: List<String>, index: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        ImageActivity.launch(this, imageUrls.toTypedArray(), index)
     }
 
     override fun showVideo(videoUrl: String, videoType: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        VideoActivity.launch(this, videoUrl, videoType)
     }
 }

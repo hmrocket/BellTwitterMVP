@@ -2,6 +2,7 @@
     <string name="app_name" translatable="false">Bell Twitter MVP</string>
     <string name="authentication_failed">Authentication failed</string>
     <string name="title_activity_tweets_map">Map</string>
+    <string name="activity_title_login">Login to twitter</string>
 
 
     <string name="retweeted_by">Retweeted by @%1$s</string>
@@ -29,4 +30,5 @@
     <string name="permission_rational_title">Permission required</string>
     <string name="permission_denied">Permission Denied</string>
     <string name="login_please">Retweets and Likes require a session, please login</string>
+    <string name="pic_of_n">%1$d of %2$d</string>
 </resources>

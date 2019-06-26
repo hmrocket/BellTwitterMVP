@@ -1,6 +1,5 @@
 package com.bell.demo.utils
 
-import android.net.Uri
 import android.view.View
 import android.widget.ImageView
 import androidx.annotation.DrawableRes
@@ -13,8 +12,8 @@ fun View.visible(show: Boolean = true) {
     this.visibility = if (show) View.VISIBLE else View.GONE
 }
 
-fun ImageView.loadUri(uri: Uri?, @DrawableRes placeholder: Int = R.drawable.placeholder) {
-    Picasso.with(context).load(uri).placeholder(placeholder).into(this)
+fun ImageView.loadUrlWithoutPlaceholder(url: String?) {
+    Picasso.with(context).load(url).into(this)
 }
 
 fun ImageView.loadUrl(url: String?, @DrawableRes placeholder: Int = R.drawable.placeholder) {
@@ -22,17 +21,20 @@ fun ImageView.loadUrl(url: String?, @DrawableRes placeholder: Int = R.drawable.p
 }
 
 fun ImageView.loadUrlCenterCrop(url: String?, @DrawableRes placeholder: Int = R.drawable.placeholder) {
-    Picasso.with(context).load(url).placeholder(placeholder).centerCrop().into(this)
+    Picasso.with(context).load(url).placeholder(placeholder).fit().centerCrop().into(this)
 }
 
 //////// Tweet
+// Important docs about entities :
+// https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/extended-entities-object
+//  https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/entities-object
 fun Tweet.hasSingleImage(): Boolean {
-    extendedEntities?.media?.size?.let { return it == 1 && extendedEntities.media[0].videoInfo == null }
+    extendedEntities?.media?.size?.let { return it == 1 && extendedEntities.media[0].type == "photo" }
     return false
 }
 
 fun Tweet.hasSingleVideo(): Boolean {
-    extendedEntities?.media?.size?.let { return it == 1 && extendedEntities.media[0].videoInfo != null }
+    extendedEntities?.media?.size?.let { return it == 1 && extendedEntities.media[0].type != "photo" }
     return false
 }
 
@@ -56,14 +58,14 @@ fun Tweet.getImageUrl(): String {
 
 fun Tweet.getVideoCoverUrl(): String {
     if (hasSingleVideo() || hasMultipleMedia())
-        return entities.media[0]?.mediaUrl ?: ""
+        return entities.media[0]?.mediaUrlHttps ?: (entities.media[0]?.mediaUrl ?: "")
     throw RuntimeException("This Tweet does not have a video")
 }
 
 fun Tweet.getVideoUrlType(): Pair<String, String> {
     if (hasSingleVideo() || hasMultipleMedia()) {
-        val mediaEntities =  entities.media
-        return Pair(mediaEntities[0].mediaUrl, mediaEntities[0].type)
+        val variant =  extendedEntities.media[0].videoInfo.variants
+        return Pair(variant[0].url, variant[0].contentType) // ideally we will pick a variant (i.e video quality) based on the screen size or user preferences
     }
     throw RuntimeException("This Tweet does not have a video")
 }

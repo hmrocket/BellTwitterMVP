@@ -2,6 +2,7 @@
 <resources>
     <!--Login Activity-->
     <string name="authentication_failed">Authentification échouée</string>
+    <string name="activity_title_login">Login à twitter</string>
     <!--Map Activity -->
     <string name="title_activity_tweets_map">Map</string>
 
@@ -30,4 +31,5 @@
     <string name="permission_rational_title">Permission demander</string>
     <string name="permission_denied">Permission refusée</string>
     <string name="login_please">Les retweets et les jaimes nécessitent une session, veuillez vous identifier.</string>
+    <string name="pic_of_n">%1$d de %2$d</string>
 </resources>

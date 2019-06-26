@@ -48,21 +48,44 @@
                 android:name=".ui.TweetsMapActivity"
                 android:parentActivityName=".MainActivity"
                 android:label="@string/title_activity_tweets_map">
-             <intent-filter>
-             <action android:name="android.intent.action.VIEW"/>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
 
-             <category android:name="android.intent.category.DEFAULT"/>
-             </intent-filter>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
         </activity>
-        <activity android:name=".ui.LoginActivity">
+        <activity android:name=".ui.LoginActivity"
+                  android:label="@string/activity_title_login"
+        >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
 
-             <intent-filter>
-             <action android:name="android.intent.action.VIEW"/>
 
-
-             <category android:name="android.intent.category.DEFAULT"/>
-             </intent-filter>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
         </activity>
+        <activity android:name=".ui.image.ImageActivity"
+                  android:label=""
+                  android:theme="@style/ImageActivityTheme">
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".ui.video.VideoActivity"
+                  android:label=""
+                  android:theme="@style/ImageActivityTheme">
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+
     </application>
 
 </manifest>
