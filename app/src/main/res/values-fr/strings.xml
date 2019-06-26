@@ -16,6 +16,7 @@
     <string name="video_preview_contentDescription">Aperçu vidéo</string>
     <string name="tweet_photo_contentDescriptor">Photo du Tweet</string>
     <string name="action_search">Recherche</string>
+    <string name="action_radius">Rayon</string>
     <string name="title_activity_search">Recherche de Tweets</string>
     <string name="welcome">BIENVENUE!</string>
     <string name="task_a">Tâche A</string>
@@ -32,4 +33,5 @@
     <string name="permission_denied">Permission refusée</string>
     <string name="login_please">Les retweets et les jaimes nécessitent une session, veuillez vous identifier.</string>
     <string name="pic_of_n">%1$d de %2$d</string>
+    <string name="action_failed">L\'action a échoué, on ne sait pas pourquoi</string>
 </resources>

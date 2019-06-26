@@ -51,5 +51,13 @@
         android:fontFamily="sans-serif-thin"
         android:textSize="12sp" />
 
-
+    <TextView
+            android:id="@+id/timeTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:ellipsize="end"
+            tools:text="12:00PM"
+            android:fontFamily="sans-serif-thin"
+            android:maxLines="1"/>
 </LinearLayout>

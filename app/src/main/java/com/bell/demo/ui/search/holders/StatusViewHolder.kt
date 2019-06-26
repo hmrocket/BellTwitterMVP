@@ -6,6 +6,7 @@ import android.widget.TextView
 import androidx.annotation.CallSuper
 import com.bell.demo.R
 import com.bell.demo.ui.search.InteractionListener
+import com.bell.demo.utils.Utils
 import com.bell.demo.utils.loadUrl
 import com.bell.demo.utils.visible
 import com.twitter.sdk.android.core.models.Tweet
@@ -32,9 +33,8 @@ open class StatusViewHolder(container: View, listener: InteractionListener) :
 
         val currentUser = currentTweet.user
         userNameTextView.text = currentUser.name
-        userScreenNameTextView.text = currentUser.screenName
-        // TODO need to format the date i.e createdAt
-        timeTextView.text = currentTweet.createdAt
+        userScreenNameTextView.text = userScreenNameTextView.context.getString(R.string.at_user, currentUser.screenName)
+        timeTextView.text = Utils.formatTime(currentTweet.createdAt)
         userProfilePicImageView.loadUrl(currentUser.profileImageUrl)
 
         if (currentTweet.favorited)

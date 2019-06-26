@@ -17,6 +17,11 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
+        <activity android:name=".ui.TweetActivity"
+                  android:label="Tweet"
+                  android:parentActivityName=".ui.TweetsMapActivity"
+        >
+        </activity>
         <activity
                 android:name=".ui.search.SearchActivity"
                 android:label="@string/title_activity_search"
@@ -24,8 +29,8 @@
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:theme="@style/AppTheme.NoActionBar"
-                android:name=".MainActivity">
+                android:name=".MainActivity"
+                android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -46,46 +51,43 @@
 
         <activity
                 android:name=".ui.TweetsMapActivity"
-                android:parentActivityName=".MainActivity"
-                android:label="@string/title_activity_tweets_map">
+                android:label="@string/title_activity_tweets_map"
+                android:parentActivityName=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
 
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
-        <activity android:name=".ui.LoginActivity"
-                  android:label="@string/activity_title_login"
-        >
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-
-
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-        </activity>
-        <activity android:name=".ui.image.ImageActivity"
-                  android:label=""
-                  android:theme="@style/ImageActivityTheme">
-
+        <activity
+                android:name=".ui.LoginActivity"
+                android:label="@string/activity_title_login">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
 
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
-
-        <activity android:name=".ui.video.VideoActivity"
-                  android:label=""
-                  android:theme="@style/ImageActivityTheme">
-
+        <activity
+                android:name=".ui.image.ImageActivity"
+                android:label=""
+                android:theme="@style/ImageActivityTheme">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
 
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
+        <activity
+                android:name=".ui.video.VideoActivity"
+                android:label=""
+                android:theme="@style/ImageActivityTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
 
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

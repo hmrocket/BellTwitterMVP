@@ -6,7 +6,10 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bell.demo.R
-import com.twitter.sdk.android.core.*
+import com.twitter.sdk.android.core.Callback
+import com.twitter.sdk.android.core.Result
+import com.twitter.sdk.android.core.TwitterException
+import com.twitter.sdk.android.core.TwitterSession
 import com.twitter.sdk.android.core.identity.TwitterLoginButton
 
 class LoginActivity : AppCompatActivity() {
@@ -30,7 +33,7 @@ class LoginActivity : AppCompatActivity() {
             override fun success(result: Result<TwitterSession>?) {
                 // go the main activity
                 // startActivity(MainActivity)
-                TwitterCore.getInstance().sessionManager.clearActiveSession()
+                finish()
             }
 
             override fun failure(e: TwitterException) {

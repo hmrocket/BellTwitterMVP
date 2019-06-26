@@ -6,6 +6,7 @@
 
 
     <string name="retweeted_by">Retweeted by @%1$s</string>
+    <string name="at_user" translatable="false">\@%1$s</string>
 
     <!-- Content Descriptors -->
     <string name="retweet_imageButton_contentDescriptor">Retweet Image Button</string>
@@ -16,6 +17,7 @@
     <string name="tweet_photo_contentDescriptor">Tweet Photo</string>
     <string name="title_activity_search">Search Tweets</string>
     <string name="action_search">Search</string>
+    <string name="action_radius">Radius</string>
     <string name="welcome">WELCOME!</string>
     <string name="demo_description">Simple demo to demonstrate Kotlin and Android SDK knowledge plus other concepts much
         needed for Android development.
@@ -31,4 +33,5 @@
     <string name="permission_denied">Permission Denied</string>
     <string name="login_please">Retweets and Likes require a session, please login</string>
     <string name="pic_of_n">%1$d of %2$d</string>
+    <string name="action_failed">Action failed, we don\'t know why</string>
 </resources>

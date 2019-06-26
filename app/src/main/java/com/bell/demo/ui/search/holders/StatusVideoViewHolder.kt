@@ -24,6 +24,7 @@ class StatusVideoViewHolder(container: View, listener: InteractionListener) :
             val pair = tweet.getVideoUrlType()
             listener.showVideo(pair.first, pair.second)
         }
+        tweetVideoImageView.setOnClickListener { playVideoImageButton.callOnClick() }
     }
 
 }
