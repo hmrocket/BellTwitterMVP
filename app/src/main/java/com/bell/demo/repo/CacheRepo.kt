@@ -18,14 +18,17 @@ object CacheRepo {
     @CheckResult
     fun getCachedTweets(radius : Int) : List<Tweet>?
             = cache.get(generateRadiusKey(radius)) as? List<Tweet>
-    fun putCachedTweets(radius : Int, list: List<Tweet>): Any = cache.put(generateRadiusKey(radius), list)
+    fun putCachedTweets(radius : Int, list: List<Tweet>?) = list?.let {cache.put(generateRadiusKey(radius), list) }
 
     @CheckResult
     fun getTweet(id: Long) = cache.get(id.toString()) as? Tweet
-    fun putTweet(tweet: Tweet): Any = cache.put(tweet.id.toString(), tweet)
+    fun putTweet(tweet: Tweet?) = tweet?.let {cache.put(tweet.id.toString(), tweet) }
 
+    @CheckResult
     fun getCachedSearch(query: String, geocode: Geocode?): List<Tweet>?
             = cache.get(generateSearchKey(query, geocode)) as? List<Tweet>
 
-    fun putCachedSearch(query: String, geocode: Geocode?, tweets: List<Tweet>): Any = cache.put(generateSearchKey(query, geocode), tweets)
+    fun putCachedSearch(query: String, geocode: Geocode?, tweets: List<Tweet>?) {
+        tweets?.let {cache.put(generateSearchKey(query, geocode), tweets) }
+    }
 }

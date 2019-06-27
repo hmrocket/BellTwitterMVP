@@ -106,6 +106,7 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return if (R.id.action_radius == item.itemId) {
+            seekBar_radius.progress = appConfig.radius
             seekBar_radius.visible(!seekBar_radius.isVisible) // toggle visibility
             true
         } else
@@ -186,7 +187,8 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback {
         val adapter = InfoAdapter(this)
         mMap.setInfoWindowAdapter(adapter)
         mMap.setOnInfoWindowClickListener(adapter)
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 12.0f))
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation,
+            getZoomLevel(appConfig.radius.toDouble() * 1000)))
         mMap.isMyLocationEnabled = true
 
         displayTweets()
@@ -202,14 +204,14 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback {
         val circle: Circle = mMap.addCircle(
             CircleOptions()
                 .center(currentLocation)
-                .radius(appConfig.radius.toDouble()) // Converting Miles into Meters...
+                .radius(appConfig.radius.toDouble() * 1000) // Converting KM into Meters...
                 .strokeColor(getColor(R.color.colorAccent))
                 .strokeWidth(2f)
         )
 
         seekBar_radius.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
-                circle.radius = p1.toDouble()
+                circle.radius = p1.toDouble() + AppConfig.MIN_RADIUS * 1000
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, getZoomLevel(circle)))
             }
 
@@ -220,7 +222,7 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback {
             override fun onStopTrackingTouch(p0: SeekBar) {
                 // circle.isVisible = false
                 fetchGeoTweets((circle.radius / 1000).toInt())
-                appConfig.radius = p0.progress
+                appConfig.radius = p0.progress + AppConfig.MIN_RADIUS.toInt()// ad
             }
 
         })
@@ -231,6 +233,13 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback {
         if (circle == null) return 0.5f
 
         val radius = circle.radius
+        return getZoomLevel(radius)
+    }
+
+    /**
+     * im Meters not KM
+     */
+    private fun getZoomLevel(radius: Double): Float {
         val scale = radius / 500
         val zoomLevel = (16 - ln(scale) / ln(2.0)).roundToInt().toFloat()
         return zoomLevel - 0.5f
