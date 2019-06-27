@@ -242,7 +242,7 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun getZoomLevel(radius: Double): Float {
         val scale = radius / 500
         val zoomLevel = (16 - ln(scale) / ln(2.0)).roundToInt().toFloat()
-        return zoomLevel - 0.5f
+        return zoomLevel + 0.5f
     }
 
 }

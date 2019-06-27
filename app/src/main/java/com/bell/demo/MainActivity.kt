@@ -61,7 +61,12 @@ class MainActivity : AppCompatActivity() {
             val dialog = builder.create()
             dialog.show()
 
-        }
+        } else
+            ActivityCompat.requestPermissions(
+                this@MainActivity,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                RQ_LOCATION_PERMISSION
+            )
     }
 
 
