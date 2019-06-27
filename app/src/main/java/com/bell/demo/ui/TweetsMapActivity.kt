@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import com.bell.demo.R
 import com.bell.demo.model.TweetType
+import com.bell.demo.repo.AppConfig
 import com.bell.demo.utils.Utils
 import com.bell.demo.utils.visible
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -52,6 +53,7 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnM
     private var mapReady = false
     private var queue: List<Tweet> = Collections.emptyList()
     private var location: Location? = null
+    private val appConfig by lazy { AppConfig(this) }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,7 +67,7 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnM
         // get location
         getCurrentLocation()
 
-        fetchGeoTweets(10)
+        fetchGeoTweets(appConfig.radius)
     }
 
     private fun fetchGeoTweets(radius: Int) {
@@ -187,11 +189,10 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnM
         val currentLocation = location?.let { LatLng(location!!.latitude, location!!.longitude) }
             ?: LatLng(45.5017, 73.5673)
 
-        val radius = 5000.0 // min
         val circle: Circle = mMap.addCircle(
             CircleOptions()
                 .center(currentLocation)
-                .radius(radius) // Converting Miles into Meters...
+                .radius(appConfig.radius.toDouble()) // Converting Miles into Meters...
                 .strokeColor(getColor(R.color.colorAccent))
                 .strokeWidth(2f)
         )
@@ -206,10 +207,10 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnM
                 circle.isVisible = true
             }
 
-            override fun onStopTrackingTouch(p0: SeekBar?) {
+            override fun onStopTrackingTouch(p0: SeekBar) {
                 // circle.isVisible = false
                 fetchGeoTweets((circle.radius / 1000).toInt())
-
+                appConfig.radius = p0.progress
             }
 
         })
@@ -266,7 +267,7 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnM
             val timestamp = text[INDEX_TIME]
             val tweet = text[INDEX_TWEET_TEXT]
 
-            Picasso.with(context)
+            Picasso.get()
                 .load(photoUrl)
                 .into(v.avatar)
 

@@ -1,4 +1,4 @@
-package com.bell.demo.ui.search
+package com.bell.demo.ui.common.interector
 
 import com.twitter.sdk.android.core.models.Tweet
 

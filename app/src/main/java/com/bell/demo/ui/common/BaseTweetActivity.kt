@@ -5,8 +5,8 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bell.demo.ui.LoginActivity
+import com.bell.demo.ui.common.interector.InteractionListener
 import com.bell.demo.ui.image.ImageActivity
-import com.bell.demo.ui.search.InteractionListener
 import com.bell.demo.ui.video.VideoActivity
 import com.google.android.material.snackbar.Snackbar
 import com.twitter.sdk.android.core.Callback
@@ -81,7 +81,14 @@ abstract class BaseTweetActivity : AppCompatActivity(), InteractionListener {
 
     override fun openTweet(tweet: Tweet) {
         Toast.makeText(this, "open tweet", Toast.LENGTH_SHORT).show()
-        startActivity(Intent.createChooser(Intent(Intent.ACTION_VIEW, Uri.parse("https://twitter.com/meggo_mrg/status/1143974685840830464")), "tweet"))
+        startActivity(
+            Intent.createChooser(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://twitter.com/${tweet.user.screenName}/status/${tweet.id}")
+                ), "tweet"
+            )
+        )
     }
 
     override fun showImage(imageUrl: String) {

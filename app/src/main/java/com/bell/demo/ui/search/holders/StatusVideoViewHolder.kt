@@ -2,7 +2,7 @@ package com.bell.demo.ui.search.holders
 
 
 import android.view.View
-import com.bell.demo.ui.search.InteractionListener
+import com.bell.demo.ui.common.interector.InteractionListener
 import com.bell.demo.utils.getVideoCoverUrl
 import com.bell.demo.utils.getVideoUrlType
 import com.bell.demo.utils.loadUrlCenterCrop

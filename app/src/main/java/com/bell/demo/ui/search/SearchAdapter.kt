@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bell.demo.R
+import com.bell.demo.ui.common.interector.InteractionListener
 import com.bell.demo.ui.search.holders.*
 import com.bell.demo.utils.*
 import com.twitter.sdk.android.core.models.Tweet
@@ -15,7 +16,7 @@ import java.util.*
 open class SearchAdapter(val listener: InteractionListener) :
         RecyclerView.Adapter<BaseViewHolder>() {
 
-    var tweets: MutableList<Tweet> = ArrayList()
+    var tweets: ArrayList<Tweet> = ArrayList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder =
         when (viewType) {

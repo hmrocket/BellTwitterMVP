@@ -4,7 +4,7 @@ package com.bell.demo.ui.search.holders
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bell.demo.ui.SpaceLeftItemDecoration
-import com.bell.demo.ui.search.InteractionListener
+import com.bell.demo.ui.common.interector.InteractionListener
 import com.twitter.sdk.android.core.models.Tweet
 import kotlinx.android.synthetic.main.tweet_multiplephotos.view.*
 

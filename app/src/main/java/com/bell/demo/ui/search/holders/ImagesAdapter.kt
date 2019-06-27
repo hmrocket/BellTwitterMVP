@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bell.demo.R
-import com.bell.demo.ui.search.InteractionListener
+import com.bell.demo.ui.common.interector.InteractionListener
 import com.bell.demo.utils.loadUrl
 import com.twitter.sdk.android.core.models.TweetEntities
 import kotlinx.android.synthetic.main.photo.view.*

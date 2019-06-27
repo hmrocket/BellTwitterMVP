@@ -13,15 +13,15 @@ fun View.visible(show: Boolean = true) {
 }
 
 fun ImageView.loadUrlWithoutPlaceholder(url: String?) {
-    Picasso.with(context).load(url).into(this)
+    Picasso.get().load(url).into(this)
 }
 
 fun ImageView.loadUrl(url: String?, @DrawableRes placeholder: Int = R.drawable.placeholder) {
-    Picasso.with(context).load(url).placeholder(placeholder).into(this)
+    Picasso.get().load(url).placeholder(placeholder).into(this)
 }
 
 fun ImageView.loadUrlCenterCrop(url: String?, @DrawableRes placeholder: Int = R.drawable.placeholder) {
-    Picasso.with(context).load(url).placeholder(placeholder).fit().centerCrop().into(this)
+    Picasso.get().load(url).placeholder(placeholder).fit().centerCrop().into(this)
 }
 
 //////// Tweet

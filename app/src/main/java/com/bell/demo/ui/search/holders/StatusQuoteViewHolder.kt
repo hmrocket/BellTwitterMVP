@@ -1,7 +1,7 @@
 package com.bell.demo.ui.search.holders
 
 import android.view.View
-import com.bell.demo.ui.search.InteractionListener
+import com.bell.demo.ui.common.interector.InteractionListener
 import com.twitter.sdk.android.core.models.Tweet
 
 class StatusQuoteViewHolder(container: View, listener: InteractionListener) :

@@ -5,7 +5,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.bell.demo.ui.search.InteractionListener
+import com.bell.demo.ui.common.interector.InteractionListener
 import com.twitter.sdk.android.core.models.Tweet
 import kotlinx.android.synthetic.main.item_interaction.view.*
 import kotlinx.android.synthetic.main.item_userinfo.view.*

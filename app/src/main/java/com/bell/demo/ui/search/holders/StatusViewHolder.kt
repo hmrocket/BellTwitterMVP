@@ -5,7 +5,7 @@ import android.view.View
 import android.widget.TextView
 import androidx.annotation.CallSuper
 import com.bell.demo.R
-import com.bell.demo.ui.search.InteractionListener
+import com.bell.demo.ui.common.interector.InteractionListener
 import com.bell.demo.utils.Utils
 import com.bell.demo.utils.loadUrl
 import com.bell.demo.utils.visible
