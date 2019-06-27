@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.annotation.LayoutRes
 import com.bell.demo.R
 import com.bell.demo.model.TweetType
+import com.bell.demo.repo.CacheRepo
 import com.bell.demo.ui.common.BaseTweetActivity
 import com.bell.demo.ui.search.holders.BaseViewHolder
 import com.bell.demo.ui.search.holders.StatusViewHolder
@@ -16,6 +17,9 @@ import com.twitter.sdk.android.core.TwitterCore
 import com.twitter.sdk.android.core.TwitterException
 import com.twitter.sdk.android.core.models.Tweet
 
+/**
+ * Show a single tweet screen
+ */
 class TweetActivity : BaseTweetActivity() {
 
     companion object {
@@ -49,11 +53,19 @@ class TweetActivity : BaseTweetActivity() {
     }
 
     private fun fetchTweetById(id : Long) {
+        // check the cache to avoid double fetch on rotation
+        CacheRepo.getTweet(id)?.let {
+            viewHolder.setup(it)
+            return
+        }
         TwitterCore.getInstance().apiClient.statusesService
                 .show(id, null, null, null)
             .enqueue(object : Callback<Tweet>() {
                 override fun success(result: Result<Tweet>?) {
-                    result?.let { viewHolder.setup(result.data) }
+                    result?.let {
+                        CacheRepo.putTweet(it.data)
+                        viewHolder.setup(result.data)
+                    }
                 }
 
                 override fun failure(exception: TwitterException?) {

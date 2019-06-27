@@ -19,7 +19,7 @@
             android:theme="@style/AppTheme">
         <activity android:name=".ui.TweetActivity"
                   android:label="Tweet"
-                  android:parentActivityName=".ui.TweetsMapActivity"
+                  android:parentActivityName=".ui.map.TweetsMapActivity"
         >
         </activity>
         <activity
@@ -50,7 +50,7 @@
                 android:value="@string/google_maps_key"/>
 
         <activity
-                android:name=".ui.TweetsMapActivity"
+                android:name=".ui.map.TweetsMapActivity"
                 android:label="@string/title_activity_tweets_map"
                 android:parentActivityName=".MainActivity">
             <intent-filter>

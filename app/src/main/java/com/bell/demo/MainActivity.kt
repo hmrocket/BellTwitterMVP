@@ -4,14 +4,14 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import com.bell.demo.ui.TweetsMapActivity
+import com.bell.demo.ui.map.TweetsMapActivity
 import com.bell.demo.ui.search.SearchActivity
 import com.bell.demo.utils.Utils
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -26,7 +26,6 @@ class MainActivity : AppCompatActivity() {
         if (!Utils.isLocationGranted(this))
             askForLocationPermission()
 
-        SearchActivity.launch(this)
     }
 
     private fun setupButton() {
@@ -39,8 +38,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        findViewById<Button>(R.id.btn_a).setOnClickListener(listener)
-        findViewById<Button>(R.id.btn_b).setOnClickListener(listener)
+        btn_a.setOnClickListener(listener)
+        btn_b.setOnClickListener(listener)
     }
 
 

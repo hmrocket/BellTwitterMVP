@@ -1,4 +1,4 @@
-package com.bell.demo.ui
+package com.bell.demo.ui.map
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -7,25 +7,24 @@ import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.widget.SeekBar
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import com.bell.demo.R
-import com.bell.demo.model.TweetType
 import com.bell.demo.repo.AppConfig
+import com.bell.demo.repo.CacheRepo
 import com.bell.demo.utils.Utils
 import com.bell.demo.utils.visible
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.*
-import com.squareup.picasso.Picasso
+import com.google.android.gms.maps.model.Circle
+import com.google.android.gms.maps.model.CircleOptions
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import com.twitter.sdk.android.core.Callback
 import com.twitter.sdk.android.core.Result
 import com.twitter.sdk.android.core.TwitterCore
@@ -35,13 +34,11 @@ import com.twitter.sdk.android.core.models.Search
 import com.twitter.sdk.android.core.models.Tweet
 import com.twitter.sdk.android.core.services.params.Geocode
 import kotlinx.android.synthetic.main.activity_tweets_map.*
-import kotlinx.android.synthetic.main.map_tweet.view.*
 import java.util.*
 import kotlin.math.ln
 import kotlin.math.roundToInt
 
-class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener,
-    GoogleMap.OnMyLocationClickListener {
+class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     companion object {
         fun launch(context: Context) {
@@ -71,6 +68,12 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnM
     }
 
     private fun fetchGeoTweets(radius: Int) {
+        // check the cache first & avoid fetching the data again just for rotation
+        CacheRepo.getCachedTweets(radius)?.let {
+            queue = it
+            displayTweets()
+            return
+        }
         // load tweets if location is null take montreal
         val geocode =
             Geocode(
@@ -84,6 +87,8 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnM
             override fun success(result: Result<Search>?) {
                 Log.d("request", result?.data?.tweets?.size.toString())
                 queue = result?.data?.tweets ?: Collections.emptyList()
+                // cache and display
+                CacheRepo.putCachedTweets(radius, queue)
                 displayTweets()
             }
 
@@ -127,30 +132,35 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnM
         mMap.clear()
         addCircle()
 
-
-        queue.forEachIndexed { i, it ->
-            run {
-                val pos: LatLng? = it.coordinates?.let { it2 -> LatLng(it2.latitude, it2.longitude) }
-                /// if coordinate is null check place https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/geo-objects.html
-                    ?: run {
-                        it.place?.boundingBox?.coordinates?.let { it2 ->
-                            if (it2.isNotEmpty() && it2[0].isNotEmpty()) LatLng(
-                                it2[0][0][Coordinates.INDEX_LATITUDE],
-                                it2[0][0][Coordinates.INDEX_LONGITUDE]
-                            )
-                            else null
-                        } ?: run { null }
-                    }
+        queue.forEach {
+                val pos: LatLng? = getTweetLatLng(it)
 
                 // if we have a non null position add marker
                 pos?.let { it2 ->
                     val text = InfoAdapter.encodeTweetInfo(it)
                     mMap.addMarker(MarkerOptions().position(it2).title(it.user.name).snippet(text))
                 }
-            }
         }
 
         seekBar_radius.visible(false)
+    }
+
+    /**
+     *  we can get location from two places from coordinates or place
+     *  @see <a href="https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/geo-objects.html">API</a>
+     */
+    private fun getTweetLatLng(it: Tweet): LatLng? {
+        return (it.coordinates?.let { it2 -> LatLng(it2.latitude, it2.longitude) }
+        /// if coordinate is null check place https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/geo-objects.html
+            ?: run {
+                it.place?.boundingBox?.coordinates?.let { it2 ->
+                    if (it2.isNotEmpty() && it2[0].isNotEmpty()) LatLng(
+                        it2[0][0][Coordinates.INDEX_LATITUDE],
+                        it2[0][0][Coordinates.INDEX_LONGITUDE]
+                    )
+                    else null
+                } ?: run { null }
+            })
     }
 
     /**
@@ -226,59 +236,4 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnM
         return zoomLevel - 0.5f
     }
 
-
-    override fun onMyLocationButtonClick(): Boolean {
-        Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show()
-        return false
-    }
-
-    override fun onMyLocationClick(p0: Location) {
-        Toast.makeText(this, "Current location:\n" + p0, Toast.LENGTH_LONG).show()
-    }
-
-    class InfoAdapter(private val context: Context) : GoogleMap.InfoWindowAdapter, GoogleMap.OnInfoWindowClickListener {
-
-        companion object {
-            fun parseTweetInfo(marker: Marker): List<String> = marker.snippet.split("~")
-            fun encodeTweetInfo(it: Tweet): String =
-                "${it.user.profileImageUrlHttps}~${it.createdAt}~${it.text}~${it.id}~${TweetType.getType(it)}"
-
-            const val INDEX_PHOTO_URL = 0
-            const val INDEX_TIME = 1
-            const val INDEX_TWEET_TEXT = 2
-            const val INDEX_TWEET_ID = 3
-            const val INDEX_TWEET_TYPE = 4
-        }
-
-        override fun onInfoWindowClick(p0: Marker) {
-            val text = parseTweetInfo(p0)
-            val id = text[INDEX_TWEET_ID].toLong()
-            val type = text[INDEX_TWEET_TYPE]
-
-            TweetActivity.launch(context, id, TweetType.valueOf(type))
-        }
-
-        override fun getInfoContents(marker: Marker): View {
-            val v = LayoutInflater.from(context).inflate(R.layout.map_tweet, null)
-
-            val text = parseTweetInfo(marker)
-
-            val photoUrl = text[INDEX_PHOTO_URL]
-            val timestamp = text[INDEX_TIME]
-            val tweet = text[INDEX_TWEET_TEXT]
-
-            Picasso.get()
-                .load(photoUrl)
-                .into(v.avatar)
-
-            v.timestamp.text = Utils.formatTime(timestamp)
-            v.name.text = marker.title
-            v.tweet.text = tweet
-
-            return v
-        }
-
-
-        override fun getInfoWindow(p0: Marker?) = null
-    }
 }

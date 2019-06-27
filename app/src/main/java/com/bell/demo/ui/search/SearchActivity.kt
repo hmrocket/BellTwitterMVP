@@ -12,6 +12,7 @@ import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bell.demo.R
 import com.bell.demo.repo.AppConfig
+import com.bell.demo.repo.CacheRepo
 import com.bell.demo.ui.common.BaseTweetActivity
 import com.bell.demo.utils.Utils
 import com.twitter.sdk.android.core.Callback
@@ -93,20 +94,24 @@ class SearchActivity : BaseTweetActivity() {
 
     private fun search(query: String = searchQuery) {
         Log.d("search", "query = $query")
-
-        val searchService = TwitterCore.getInstance().apiClient.searchService
         val currentOrMontreal = Geocode(
             location?.latitude ?: 45.5017, location?.longitude ?: 73.5673,
             radius, Geocode.Distance.KILOMETERS
         )
+
+        CacheRepo.getCachedSearch(query, currentOrMontreal)?.let {
+            displayTweetsSearch(it)
+            return
+        }
+
+        val searchService = TwitterCore.getInstance().apiClient.searchService
         searchService.tweets(
             query, currentOrMontreal, null, null, null, 100, null, null, null, true
         )
             .enqueue(object : Callback<Search>() {
                 override fun success(result: Result<Search>) {
-                    adapter.tweets = ArrayList(result.data.tweets)
-                    adapter.notifyDataSetChanged()
-
+                    displayTweetsSearch(result.data.tweets)
+                    CacheRepo.putCachedSearch(query, currentOrMontreal, result.data.tweets)
                 }
 
                 override fun failure(exception: TwitterException) {
@@ -115,6 +120,11 @@ class SearchActivity : BaseTweetActivity() {
             })
 
 
+    }
+
+    private fun displayTweetsSearch(it: List<Tweet>) {
+        adapter.tweets = ArrayList(it)
+        adapter.notifyDataSetChanged()
     }
 
 
