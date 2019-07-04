@@ -9,19 +9,14 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import androidx.appcompat.widget.SearchView
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bell.demo.R
 import com.bell.demo.repo.AppConfig
-import com.bell.demo.repo.CacheRepo
 import com.bell.demo.ui.common.BaseTweetActivity
 import com.bell.demo.utils.Utils
-import com.twitter.sdk.android.core.Callback
-import com.twitter.sdk.android.core.Result
-import com.twitter.sdk.android.core.TwitterCore
-import com.twitter.sdk.android.core.TwitterException
-import com.twitter.sdk.android.core.models.Search
 import com.twitter.sdk.android.core.models.Tweet
-import com.twitter.sdk.android.core.services.params.Geocode
 import kotlinx.android.synthetic.main.activity_search.*
 import java.util.*
 
@@ -38,6 +33,7 @@ class SearchActivity : BaseTweetActivity() {
     private lateinit var adapter: SearchAdapter
     private var location: Location? = null
     private var searchQuery: String = "#food"
+    private lateinit var model : SearchViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +45,20 @@ class SearchActivity : BaseTweetActivity() {
 
         getCurrentLocation()
 
-        search()
+        model = ViewModelProviders.of(this).get(SearchViewModel::class.java)
+
+        val observable = Observer<List<Tweet>?> {
+            if (it == null)
+                Log.e("tweet search", "failed request") // display a message
+            else if (it.isEmpty())
+                Log.i("tweet search", "no result found, try another keyword")
+            else
+                displayTweetsSearch(it)
+
+        }
+
+        model.getObservedTweets().observe(this, observable)
+        model.onViewInitialized(searchQuery, location, radius)
     }
 
     @SuppressLint("MissingPermission")
@@ -79,7 +88,7 @@ class SearchActivity : BaseTweetActivity() {
 
         searchItem.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
-                search(query)
+                model.searchTweets(query, location, radius)
                 supportActionBar?.title = query
                 searchItem.onActionViewCollapsed()
                 return true
@@ -92,36 +101,6 @@ class SearchActivity : BaseTweetActivity() {
 
     }
 
-    private fun search(query: String = searchQuery) {
-        Log.d("search", "query = $query")
-        val currentOrMontreal = Geocode(
-            location?.latitude ?: 45.5017, location?.longitude ?: 73.5673,
-            radius, Geocode.Distance.KILOMETERS
-        )
-
-        CacheRepo.getCachedSearch(query, currentOrMontreal)?.let {
-            displayTweetsSearch(it)
-            return
-        }
-
-        val searchService = TwitterCore.getInstance().apiClient.searchService
-        searchService.tweets(
-            query, currentOrMontreal, null, null, null, 100, null, null, null, true
-        )
-            .enqueue(object : Callback<Search>() {
-                override fun success(result: Result<Search>) {
-                    displayTweetsSearch(result.data.tweets)
-                    CacheRepo.putCachedSearch(query, currentOrMontreal, result.data.tweets)
-                }
-
-                override fun failure(exception: TwitterException) {
-                    Log.e("tweet search", "failed request ${exception.message}")
-                }
-            })
-
-
-    }
-
     private fun displayTweetsSearch(it: List<Tweet>) {
         adapter.tweets = ArrayList(it)
         adapter.notifyDataSetChanged()
@@ -130,8 +109,8 @@ class SearchActivity : BaseTweetActivity() {
 
     override fun postInteractionSuccessful(tweetBefore: Tweet, tweetAfter: Tweet) {
 
-        val index = adapter.tweets.asSequence()
-            .indexOfFirst { it == tweetBefore || (it.retweeted && it.retweetedStatus == it)}
+        val index = adapter.tweets
+            .indexOfFirst { it == tweetBefore || (it.retweeted && it.retweetedStatus == it) }
 
         if (index != -1) {
             adapter.tweets.removeAt(index)
