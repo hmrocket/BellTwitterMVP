@@ -4,17 +4,14 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.annotation.LayoutRes
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.bell.demo.R
 import com.bell.demo.model.TweetType
-import com.bell.demo.repo.CacheRepo
 import com.bell.demo.ui.common.BaseTweetActivity
-import com.bell.demo.ui.search.holders.BaseViewHolder
-import com.bell.demo.ui.search.holders.StatusViewHolder
+import com.bell.demo.ui.search.holders.*
+import com.bell.demo.ui.tweet.TweetViewModel
 import com.google.android.material.snackbar.Snackbar
-import com.twitter.sdk.android.core.Callback
-import com.twitter.sdk.android.core.Result
-import com.twitter.sdk.android.core.TwitterCore
-import com.twitter.sdk.android.core.TwitterException
 import com.twitter.sdk.android.core.models.Tweet
 
 /**
@@ -35,6 +32,7 @@ class TweetActivity : BaseTweetActivity() {
     }
 
     lateinit var viewHolder : BaseViewHolder
+    lateinit var model: TweetViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,33 +46,21 @@ class TweetActivity : BaseTweetActivity() {
         setContentView(getViewId(typeString))
         viewHolder = getHolder(typeString)
 
-        fetchTweetById(id)
+        model = ViewModelProviders.of(this).get(TweetViewModel::class.java)
 
-    }
-
-    private fun fetchTweetById(id : Long) {
-        // check the cache to avoid double fetch on rotation
-        CacheRepo.getTweet(id)?.let {
-            viewHolder.setup(it)
-            return
+        val observer = Observer<Tweet?> {
+            if (it == null)
+                Snackbar.make(
+                    this@TweetActivity.window.decorView,
+                    getString(R.string.action_failed), Snackbar.LENGTH_SHORT
+                ).show()
+            else
+                viewHolder.setup(it)
         }
-        TwitterCore.getInstance().apiClient.statusesService
-                .show(id, null, null, null)
-            .enqueue(object : Callback<Tweet>() {
-                override fun success(result: Result<Tweet>?) {
-                    result?.let {
-                        CacheRepo.putTweet(it.data)
-                        viewHolder.setup(result.data)
-                    }
-                }
 
-                override fun failure(exception: TwitterException?) {
-                    Snackbar.make(
-                        this@TweetActivity.window.decorView,
-                        getString(R.string.action_failed), Snackbar.LENGTH_SHORT
-                    ).show()
-                }
-            })
+        model.getObseravale().observe(this, observer)
+
+        model.onViewInitialized(id)
     }
 
     @LayoutRes
@@ -89,11 +75,11 @@ class TweetActivity : BaseTweetActivity() {
 
     private fun getHolder(typeString: String) : BaseViewHolder = when (TweetType.valueOf(typeString)) {
         TweetType.BASIC -> StatusViewHolder(window.decorView, this)
-        TweetType.LINK -> StatusViewHolder(window.decorView, this)
-        TweetType.PHOTO -> StatusViewHolder(window.decorView, this)
-        TweetType.MULTIPLE_PHOTOS -> StatusViewHolder(window.decorView, this)
-        TweetType.QUOTE -> StatusViewHolder(window.decorView, this)
-        TweetType.VIDEO -> StatusViewHolder(window.decorView, this)
+        TweetType.LINK -> StatusLinkViewHolder(window.decorView, this)
+        TweetType.PHOTO -> StatusPhotoViewHolder(window.decorView, this)
+        TweetType.MULTIPLE_PHOTOS -> StatusMultiplePhotosViewHolder(window.decorView, this)
+        TweetType.QUOTE -> StatusQuoteViewHolder(window.decorView, this)
+        TweetType.VIDEO -> StatusVideoViewHolder(window.decorView, this)
     }
 
     override fun postInteractionSuccessful(tweetBefore: Tweet, tweetAfter: Tweet) {
