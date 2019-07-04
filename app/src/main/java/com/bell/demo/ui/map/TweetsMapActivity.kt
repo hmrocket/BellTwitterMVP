@@ -6,12 +6,13 @@ import android.content.Intent
 import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.bell.demo.R
 import com.bell.demo.repo.AppConfig
 import com.bell.demo.repo.CacheRepo
@@ -25,16 +26,9 @@ import com.google.android.gms.maps.model.Circle
 import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.twitter.sdk.android.core.Callback
-import com.twitter.sdk.android.core.Result
-import com.twitter.sdk.android.core.TwitterCore
-import com.twitter.sdk.android.core.TwitterException
 import com.twitter.sdk.android.core.models.Coordinates
-import com.twitter.sdk.android.core.models.Search
 import com.twitter.sdk.android.core.models.Tweet
-import com.twitter.sdk.android.core.services.params.Geocode
 import kotlinx.android.synthetic.main.activity_tweets_map.*
-import java.util.*
 import kotlin.math.ln
 import kotlin.math.roundToInt
 
@@ -46,9 +40,9 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    private lateinit var model: TweetsMapViewModel
     private lateinit var mMap: GoogleMap
     private var mapReady = false
-    private var queue: List<Tweet> = Collections.emptyList()
     private var location: Location? = null
     private val appConfig by lazy { AppConfig(this) }
 
@@ -64,39 +58,21 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback {
         // get location
         getCurrentLocation()
 
-        fetchGeoTweets(appConfig.radius)
-    }
+        model = ViewModelProviders.of(this).get(TweetsMapViewModel::class.java)
 
-    private fun fetchGeoTweets(radius: Int) {
-        // check the cache first & avoid fetching the data again just for rotation
-        CacheRepo.getCachedTweets(radius)?.let {
-            queue = it
-            displayTweets()
-            return
-        }
-        // load tweets if location is null take montreal
-        val geocode =
-            Geocode(
-                location?.latitude ?: 45.5017, location?.longitude ?: 73.5673,
-                radius, Geocode.Distance.KILOMETERS
-            )
-        TwitterCore.getInstance().apiClient.searchService.tweets(
-            "#food", geocode, null,
-            null, null, 100, null, null, null, null
-        ).enqueue(object : Callback<Search>() {
-            override fun success(result: Result<Search>?) {
-                Log.d("request", result?.data?.tweets?.size.toString())
-                queue = result?.data?.tweets ?: Collections.emptyList()
-                // cache and display
-                CacheRepo.putCachedTweets(radius, queue)
+        val observer = Observer<List<Tweet>?> { tweets ->
+            // Update the UI
+            tweets?.let {
+                // cache and display, (it's good to have cache, specially when offline mode is not implemented, sometime the user press back intentionally and expect the content already there and not to wait again )
+                CacheRepo.putCachedTweets(appConfig.radius, tweets)
                 displayTweets()
             }
 
-            override fun failure(exception: TwitterException?) {
-                Log.e("request", exception?.cause?.toString() ?: "")
-            }
+        }
 
-        })
+        model.getObservedTweets().observe(this, observer)
+
+        model.onViewInitialized(location, appConfig.radius)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -126,22 +102,24 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun displayTweets() {
-        if (queue.isEmpty() || !mapReady) {
+        if (model.getObservedTweets().value.isNullOrEmpty() || !mapReady) {
             return
         }
+        val queue = model.getObservedTweets().value!!
         // remove all old markers
         mMap.clear()
         addCircle()
 
-        queue.forEach {
-                val pos: LatLng? = getTweetLatLng(it)
-
-                // if we have a non null position add marker
-                pos?.let { it2 ->
-                    val text = InfoAdapter.encodeTweetInfo(it)
-                    mMap.addMarker(MarkerOptions().position(it2).title(it.user.name).snippet(text))
-                }
-        }
+        queue
+            .map { Pair(it, getTweetLatLng(it)) }
+            .filter { it.second != null}  // if we have a non null position add marker
+            .forEach {
+                val text = InfoAdapter.encodeTweetInfo(it.first)
+                mMap.addMarker(MarkerOptions()
+                    .position(it.second!!)
+                    .title(it.first.user.name)
+                    .snippet(text))
+            }
 
         seekBar_radius.visible(false)
     }
@@ -221,7 +199,7 @@ class TweetsMapActivity : AppCompatActivity(), OnMapReadyCallback {
 
             override fun onStopTrackingTouch(p0: SeekBar) {
                 // circle.isVisible = false
-                fetchGeoTweets((circle.radius / 1000).toInt())
+                model.fetchGeoTweets(location, (circle.radius / 1000).toInt())
                 appConfig.radius = p0.progress + AppConfig.MIN_RADIUS.toInt()// ad
             }
 

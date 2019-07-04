@@ -35,6 +35,7 @@ open class StatusViewHolder(container: View, listener: InteractionListener) :
         userNameTextView.text = currentUser.name
         userScreenNameTextView.text = userScreenNameTextView.context.getString(R.string.at_user, currentUser.screenName)
         timeTextView.text = Utils.formatTime(currentTweet.createdAt)
+
         userProfilePicImageView.loadUrl(currentUser.profileImageUrl)
 
         if (currentTweet.favorited)
